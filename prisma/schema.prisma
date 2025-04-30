@@ -1,0 +1,261 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client" // Esta línea es crucial
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum TYPE_ANALYTIC {
+  DAY
+  MONTH
+  YEAR
+}
+
+enum TYPE_COMMENT_VISIT {
+  RESTAURANT
+  MENU
+}
+
+model CoreFiles {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+
+  useIn       String
+  pathString  String
+  type        String
+  size        String
+
+  photo       Photos?
+
+  createAt    DateTime  @default(now())
+  updateAt    DateTime  @updatedAt
+  deleteAt    DateTime?
+}
+
+model User  {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+
+  age                     String
+  name                    String
+  lastname                String
+  email                   String
+  password                String
+
+  acceptEmail             String
+
+  // # REFERENCE FIELD
+  visit                   Visits[]
+  comment                 Comment[]
+  //#
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Restaurants {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+
+  access          String @unique
+
+  name            String
+  address         String?
+  phone           String?
+  website         String?
+  horario         String
+
+  about           String
+
+  typeId          String      @db.ObjectId
+  typeReference   Type        @relation(fields: [typeId], references: [id])
+
+  environmentId   String                        @db.ObjectId
+  environmentReference        Environment       @relation(fields: [environmentId], references: [id])
+
+
+  tag             Json
+
+  // # RELATIONS FIELDS
+  menus           Menus[]
+  analytic        Analytic[]
+  visit           Visits[]
+  comment         Comment[]
+  // #
+
+  // # LOCATIONS
+  locations       Localtion[]
+
+  createAt        DateTime  @default(now())
+  updateAt        DateTime  @updatedAt
+  deleteAt        DateTime?
+}
+
+model Localtion {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+
+  restaurantId      String      @db.ObjectId
+  restaurantReference       Restaurants         @relation(fields: [restaurantId], references: [id])
+
+  location  Json
+
+  createAt  DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  deleteAt  DateTime?
+}
+
+model Photos {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+
+  photoId   String    @unique @db.ObjectId
+  file      CoreFiles @relation(fields: [photoId], references: [id])
+
+  about     String?
+
+  createAt  DateTime  @default(now())
+  updateAt  DateTime  @updatedAt
+  deleteAt  DateTime?
+}
+
+model Analytic {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  restaurantId            String?       @db.ObjectId
+  restauranteReference    Restaurants?        @relation(fields: [restaurantId], references: [id])
+
+  menuId                  String?       @db.ObjectId
+  menueReference          Menus?        @relation(fields: [menuId], references: [id])
+
+  type                    TYPE_ANALYTIC
+  entity                  TYPE_COMMENT_VISIT
+
+  comment                 Int
+  commentPositive         Int
+  commentNegative         Int
+
+  visit                   Int
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Visits {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  restaurantId            String?       @db.ObjectId
+  restaurantReference    Restaurants?        @relation(fields: [restaurantId], references: [id])
+
+  menuId                  String?       @db.ObjectId
+  menueReference          Menus?        @relation(fields: [menuId], references: [id])
+
+  userLogId               String?       @db.ObjectId
+  userLog                 User?         @relation(fields: [userLogId], references: [id])
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Comment {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  restaurantId            String?             @db.ObjectId
+  restaurantReference    Restaurants?        @relation(fields: [restaurantId], references: [id])
+
+  menuId                  String?       @db.ObjectId
+  menueReference          Menus?        @relation(fields: [menuId], references: [id])
+
+  stars                   Int
+  comment                 String
+
+  userLogId               String      @db.ObjectId
+  userLogReference        User        @relation(fields: [userLogId], references: [id])
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Menus {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  name                    String
+  price                   Int
+  about                   String
+  allergens               Json
+  ingredients             Json
+  forPeople               Int
+  preparation             String
+  tags                    Json
+
+  restaurantId            String        @db.ObjectId
+  restauranteReference    Restaurants         @relation(fields: [restaurantId], references: [id])
+
+  // # RELATIONS FIEDS
+  analytic        Analytic[]
+  visit           Visits[]
+  comment         Comment[]
+  // #
+
+  categoryId        String        @db.ObjectId
+  categoryReference Category      @relation(fields: [categoryId], references: [id])
+
+  typeId            String        @db.ObjectId
+  typeReference     Type      @relation(fields: [typeId], references: [id])
+  // #
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Category {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  name                    String @unique
+
+  // # RELATIONS FIEDS
+  menus                   Menus[]
+  // #
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Type {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  name                    String @unique
+
+  // # RELATIONS FIEDS
+  menus                   Menus[]
+  restaurant              Restaurants[]
+  // #
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
+
+model Environment {
+  id                      String @id @default(auto()) @map("_id") @db.ObjectId
+  
+  name                    String @unique
+
+  // # RELATIONS FIEDS
+  restaurant              Restaurants[]
+  // #
+
+  createAt                DateTime  @default(now())
+  updateAt                DateTime  @updatedAt
+  deleteAt                DateTime?
+}
