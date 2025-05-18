@@ -15,10 +15,14 @@ export default class RestaurantUsecase {
     ) { }
 
     public async createNewRestaurant({ data }: { data: RestaurantDto }) {
-
         const entity = await this.entity.create({
             data: {
-                ...data,
+                about: data.about,
+                horario: data.horario,
+                name: data.name,
+                tag: data.tag,
+                website: data.website,
+                phone: data.phone,
                 access: await this.repository.createAccess(),
                 environmentReference: { connect:{ id:data.environmentId } },
                 typeReference: { connect:{ id:data.typeId } },
@@ -37,8 +41,20 @@ export default class RestaurantUsecase {
         const foundRestaurant = await this.entity.find({ filter: { id } });
         if (!foundRestaurant) return { error: true, message: [`Restaurante no encontrado.`] };
 
+        const newData: Prisma.RestaurantsUpdateInput = {} 
+
+        if(data.about) newData.about = data.about;
+        if(data.about) newData.about = data.about;
+        if(data.horario) newData.horario = data.horario;
+        if(data.tag) newData.tag = data.tag;
+        if(data.phone) newData.phone = data.phone;
+        if(data.website) newData.website = data.website;
+        if(data.name) newData.name = data.name;
+        if(data.typeId) newData.typeReference = {connect:{id:data.typeId}};
+        if(data.environmentId) newData.environmentReference = {connect:{id:data.environmentId}};
+
         const entity = await this.entity.update({
-            data: { ...data },
+            data: newData,
             id,
             event: this.template.event({ body: data, type: `UPDATE` })
         })
@@ -87,14 +103,31 @@ export default class RestaurantUsecase {
         const paginate = await paginatePromise;
         const count = await countPromise;
 
+        const currentPage = Math.floor(skip / take) + 1; // Calcula la página actual
+
+        // Calcula metadatos de paginación
+        const totalPages = Math.ceil(count / take);
+        const hasNextPage = currentPage < totalPages;
+        const hasPreviousPage = currentPage > 1;
+        // Aquí termina la lógica de paginación
+
         return {
             message: [`Restaurantes obtenidos.`],
             body: {
                 data: paginate,
                 count,
+                pagination: { // Nuevo objeto meta con información de paginación
+                    count,
+                    currentPage,
+                    totalPages,
+                    itemsPerPage: take,
+                    hasNextPage,
+                    hasPreviousPage,
+                    nextPage: hasNextPage ? currentPage + 1 : null,
+                    previousPage: hasPreviousPage ? currentPage - 1 : null
+                }
             }
         }
     }
-
 }
 

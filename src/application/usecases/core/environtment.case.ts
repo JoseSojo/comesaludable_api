@@ -7,7 +7,7 @@ import EnvirontmentRepository from "src/infrastructure/repositories/core/environ
 
 @Injectable()
 export default class EnvirontmenUsecase {
-    
+
     constructor(
         private entity: EnvirontmentEntity,
         private repository: EnvirontmentRepository,
@@ -15,13 +15,13 @@ export default class EnvirontmenUsecase {
     ) { }
 
     public async createNewEnvirontment({ data }: { data: EnvirontmentDto }) {
-
+        console.log(data);
         const entity = await this.entity.create({
             data: {
                 ...data,
             },
             event: this.template.event({ body: data, type: `CREATE` })
-        })
+        });
 
         return {
             error: false,
@@ -75,19 +75,35 @@ export default class EnvirontmenUsecase {
             })
         }
 
-        console.log({AND:filter});
-
         const paginatePromise = this.entity.filter({ filter: { AND: filter }, skip, take });
         const countPromise = this.entity.count({ filter: { AND: filter } });
 
         const paginate = await paginatePromise;
         const count = await countPromise;
 
+        const currentPage = Math.floor(skip / take) + 1; // Calcula la página actual
+
+        // Calcula metadatos de paginación
+        const totalPages = Math.ceil(count / take);
+        const hasNextPage = currentPage < totalPages;
+        const hasPreviousPage = currentPage > 1;
+        // Aquí termina la lógica de paginación
+
         return {
             message: [`Ambiente obtenidos.`],
             body: {
                 data: paginate,
                 count,
+                pagination: { // Nuevo objeto meta con información de paginación
+                    count,
+                    currentPage,
+                    totalPages,
+                    itemsPerPage: take,
+                    hasNextPage,
+                    hasPreviousPage,
+                    nextPage: hasNextPage ? currentPage + 1 : null,
+                    previousPage: hasPreviousPage ? currentPage - 1 : null
+                }
             }
         }
     }

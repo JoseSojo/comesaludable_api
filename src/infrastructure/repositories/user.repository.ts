@@ -24,6 +24,14 @@ export default class UserRepository extends RepositoryMaster {
         return { token };
     }
 
+    public async decodeJWT (payload: any): Promise<{ token: string }> {
+        const secret = process.env.JWT_SECRET || `abc.12345`;
+        const privateKey = process.env.JWT_PRIVATE_KEY || `abc.12345`;
+        const tokenPromise = this.jwtService.decode(payload);
+        const token = tokenPromise;
+        return { token };
+    }
+
     public async hash (password: string) {
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(password, saltOrRounds);

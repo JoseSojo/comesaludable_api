@@ -5,7 +5,9 @@ import { join } from 'path';
 
 async function bootstrap() {
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'], // Habilita todos los niveles
+  });
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
@@ -15,7 +17,6 @@ async function bootstrap() {
 
   /* # # # SETTINGS # # # */
   const PORT = process.env.PORT || 3500;
-
 
   await app.listen(PORT);
   console.log(`SERVER RUNNIG PORT: ${PORT}`)

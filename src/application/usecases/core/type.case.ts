@@ -81,11 +81,29 @@ export default class TypeUsecase {
         const paginate = await paginatePromise;
         const count = await countPromise;
 
+        const currentPage = Math.floor(skip / take) + 1; // Calcula la página actual
+
+        // Calcula metadatos de paginación
+        const totalPages = Math.ceil(count / take);
+        const hasNextPage = currentPage < totalPages;
+        const hasPreviousPage = currentPage > 1;
+        // Aquí termina la lógica de paginación
+
         return {
             message: [`Type obtenidos.`],
             body: {
                 data: paginate,
                 count,
+                pagination: { // Nuevo objeto meta con información de paginación
+                    count,
+                    currentPage,
+                    totalPages,
+                    itemsPerPage: take,
+                    hasNextPage,
+                    hasPreviousPage,
+                    nextPage: hasNextPage ? currentPage + 1 : null,
+                    previousPage: hasPreviousPage ? currentPage - 1 : null
+                }
             }
         }
     }

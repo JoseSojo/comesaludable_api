@@ -25,7 +25,7 @@ export default class TypeEntity extends EntityInfraestructure {
 
     public async update ({id, data, event}:{id: string, data:Prisma.TypeUpdateInput, event?: EventType}) {
         this.emiter.emit(this.UPDATE, event); // Dispath pre event
-        const entityPromise = this.prisma.type.update({ data, where:{ id } }); // Update promise
+        const entityPromise = this.prisma.type.update({ data:{ name: data.name }, where:{ id } }); // Update promise
         this.emiter.emit(this.UPDATE, event); // Distact post event
         const entity = await entityPromise; // await promise
         return entity;

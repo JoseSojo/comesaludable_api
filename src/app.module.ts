@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { PrismaService } from './infrastructure/services/prisma.service';
 import PhotoEntity from './infrastructure/entity/photo.entity';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -72,13 +72,19 @@ import EnvirontmenUsecase from './application/usecases/core/environtment.case';
 import LocationFaker from './application/faker/location.faker';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AuthGuard } from './domain/config/guards/AuthGuard';
+import DashboardController from './domain/controllers/dashboard.controller';
+import SelectedUsecase from './application/usecases/selected.case';
+import SelectedController from './domain/controllers/selected.controller';
+import { HttpLoggerMiddleware } from './domain/config/logger';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    EventEmitterModule.forRoot()
+    EventEmitterModule.forRoot(),
+    
   ],
   controllers: [
     MenuController,
@@ -92,6 +98,8 @@ import { join } from 'path';
     EnvirontmentController,
     FakeController,       // # # FAKER
     LoggingController,    // # # LOGGING
+    DashboardController,
+    SelectedController,
   ],
   providers: [
     /**
@@ -156,6 +164,7 @@ import { join } from 'path';
     VisitUsecase,       // INTERACTION
     CommentUsecase,     // INTERACTION
     AnalyticUsecase,    // INTERACTION
+    SelectedUsecase,
     // # # # # # SCHEDULING # # # # #
     TaskScheduling,    // SCHEDULING
     // # # # # # LOGGING # # # # #
@@ -167,6 +176,8 @@ import { join } from 'path';
      * # # # # # # # # # # # #
     */
 
+    // # # # # # GUARDS # # # # #
+    AuthGuard,
     // # # # # # TEMPLATES # # # # #
     UserTemplate,
     MenuTemplate,
@@ -183,4 +194,10 @@ import { join } from 'path';
     HttpError
   ]
 })
-export class AppModule { }
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(HttpLoggerMiddleware)
+      .forRoutes('*'); // Aplica a todas las rutas
+  }
+}

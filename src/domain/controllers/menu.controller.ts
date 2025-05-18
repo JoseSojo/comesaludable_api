@@ -11,6 +11,7 @@ export default class MenuController {
         @Post(`create`)
         @UsePipes(new ValidationPipe({ transform: true }))
         private async create(@Body() body: MenusDto) {
+            console.log(body);
             return await this.useCase.createNewMenus({ data: body });
         }
     
@@ -23,6 +24,7 @@ export default class MenuController {
         @Delete(`delete/:id`)
         @UsePipes(new ValidationPipe({ transform: true }))
         private async delete(@Param() param: { id: string }) {
+            console.log(param);
             return await this.useCase.deleteMenus({ id: param.id });
         }
     
@@ -34,11 +36,13 @@ export default class MenuController {
     
         @Get(`paginate`)
         @UsePipes(new ValidationPipe({ transform: true }))
-        private async paginate(@Query() query: { skip: string, take: string, param?: string }) {
+        private async paginate(@Query() query: { skip: string, take: string, param?: string, categoryId?:string, typeId?:string }) {
             return await this.useCase.paginateMenus({
                 skip: query.skip ? Number(query.skip) : 0,
                 take: query.take ? Number(query.take) : 10,
-                param: query.param ? query.param : ``
+                param: query.param ? query.param : ``,
+                categoryId: query.categoryId != `undefined` ? query.categoryId : null,
+                typeId: query.typeId != `undefined` ? query.typeId : null,
             });
         }
 }

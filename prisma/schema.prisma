@@ -49,6 +49,8 @@ model User  {
   email                   String
   password                String
 
+  admin                   Boolean           @default(false)
+
   acceptEmail             String
 
   // # REFERENCE FIELD
@@ -74,11 +76,11 @@ model Restaurants {
 
   about           String
 
-  typeId          String      @db.ObjectId
-  typeReference   Type        @relation(fields: [typeId], references: [id])
+  typeId          String?      @db.ObjectId
+  typeReference   Type?        @relation(fields: [typeId], references: [id])
 
-  environmentId   String                        @db.ObjectId
-  environmentReference        Environment       @relation(fields: [environmentId], references: [id])
+  environmentId   String?                        @db.ObjectId
+  environmentReference        Environment?       @relation(fields: [environmentId], references: [id])
 
 
   tag             Json
@@ -92,6 +94,7 @@ model Restaurants {
 
   // # LOCATIONS
   locations       Localtion[]
+  position        Int[]
 
   createAt        DateTime  @default(now())
   updateAt        DateTime  @updatedAt
@@ -205,11 +208,11 @@ model Menus {
   comment         Comment[]
   // #
 
-  categoryId        String        @db.ObjectId
-  categoryReference Category      @relation(fields: [categoryId], references: [id])
+  categoryId        String?        @db.ObjectId
+  categoryReference Category?      @relation(fields: [categoryId], references: [id])
 
-  typeId            String        @db.ObjectId
-  typeReference     Type      @relation(fields: [typeId], references: [id])
+  typeId            String?        @db.ObjectId
+  typeReference     Type?      @relation(fields: [typeId], references: [id])
   // #
 
   createAt                DateTime  @default(now())

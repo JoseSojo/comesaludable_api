@@ -30,6 +30,7 @@ export default class RestaurantController {
     @Get(`find/:id`)
     @UsePipes(new ValidationPipe({ transform: true }))
     private async find(@Param() param: { id: string }) {
+        console.log(param);
         return await this.useCase.findRestaurant({ id: param.id });
     }
 

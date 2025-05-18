@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Menus, Prisma } from "@prisma/client";
 import EntityInfraestructure from "./entity.master";
 import { EventType } from "../dto/interfaces/event.interface";
 import { Injectable } from "@nestjs/common";
@@ -50,7 +50,15 @@ export default class MenusEntity extends EntityInfraestructure {
                 createAt: true,
                 deleteAt: true,
                 updateAt: true,
-                id: true
+                id: true,
+                allergens: true,
+                about: true,
+                forPeople: true,
+                ingredients: true,
+                name: true,
+                tags: true,
+                price: true,
+                preparation: true,
             },
             where:filter 
         }); // DELETE promise
@@ -59,7 +67,7 @@ export default class MenusEntity extends EntityInfraestructure {
         return entity;
     }
 
-    public async filter ({filter, event,skip,take,select}:{filter: Prisma.MenusWhereInput, select?:Prisma.MenusSelect, skip: number, take: number, event?: EventType}) {
+    public async filter ({filter, event,skip,take,select,order}:{order?:Prisma.MenusOrderByWithRelationInput,filter: Prisma.MenusWhereInput, select?:Prisma.MenusSelect, skip: number, take: number, event?: EventType}) {
         this.emiter.emit(this.FILTER, event); // Dispath pre event
         const entityPromise = this.prisma.menus.findMany({
             skip,
@@ -72,8 +80,17 @@ export default class MenusEntity extends EntityInfraestructure {
                 createAt: true,
                 deleteAt: true,
                 updateAt: true,
-                id: true
+                id: true,
+                allergens: true,
+                about: true,
+                forPeople: true,
+                ingredients: true,
+                name: true,
+                tags: true,
+                price: true,
+                preparation: true,
             }, 
+            orderBy: order ? order : {createAt:"asc"},
             where:filter 
         }); // Filter promise
         this.emiter.emit(this.FILTER, event); // Distact post event

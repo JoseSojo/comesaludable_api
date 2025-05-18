@@ -57,7 +57,7 @@ export default class RestaurantEntity extends EntityInfraestructure {
                 createAt: true,
                 deleteAt: true,
                 updateAt: true,
-                id: true
+                id: true,
             },
             where:filter 
         }); // DELETE promise
@@ -66,11 +66,12 @@ export default class RestaurantEntity extends EntityInfraestructure {
         return entity;
     }
 
-    public async filter ({filter, event,skip,take,select}:{filter: Prisma.RestaurantsWhereInput, select?:Prisma.RestaurantsSelect, skip: number, take: number, event?: EventType}) {
+    public async filter ({filter, event,skip,take,select,order}:{order?: Prisma.RestaurantsOrderByWithRelationInput,filter: Prisma.RestaurantsWhereInput, select?:Prisma.RestaurantsSelect, skip: number, take: number, event?: EventType}) {
         this.emiter.emit(this.FILTER, event); // Dispath pre event
         const entityPromise = this.prisma.restaurants.findMany({
             skip,
             take,
+            orderBy: order ? order : { createAt: `asc` },
             select: select ? select : {
                 _count: true,
                 about: true,

@@ -53,7 +53,8 @@ export default class UserEntity extends EntityInfraestructure {
                 createAt: true,
                 deleteAt: true,
                 updateAt: true,
-                id: true
+                id: true,
+                admin: true
             },
             where: filter 
         }); // DELETE promise
